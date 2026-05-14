@@ -174,7 +174,7 @@ $base = "/TCC_RELPJAM";
   <ul>
     <a href="http://localhost/TCC_RELPJAM/app/views/class.php"><li class="active">CLASS</li></a>
     <a href="http://localhost/TCC_RELPJAM/app/views/class2.php"><li class="active">CLASS2</li></a>
-    <a href="http://localhost/TCC_RELPJAM/app/views/class3.php"><li class="active">CLASS3></a>
+    <a href="http://localhost/TCC_RELPJAM/app/views/class3.php"><li class="active">CLASS3</a>
     <a href="http://localhost/TCC_RELPJAM/app/views/class4.php"><li class="active">CLASS4</li></a>
     <a href="http://localhost/TCC_RELPJAM/app/views/class5.php"><li class="active">CLASS5</li></a>
     <a href="http://localhost/TCC_RELPJAM/app/views/class6.php"><li class="active">CLASS6</li></a>
