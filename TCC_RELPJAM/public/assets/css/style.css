@@ -4,9 +4,13 @@
     box-sizing: border-box;
 }
 
-body {
-    font-family: Arial;
-    background: #f5f5f5;
+body{
+    background:
+    linear-gradient(
+        to bottom,
+        #f5f7fa,
+        #e9eef5
+    );
 }
 
 /* ================= HEADER ================= */
@@ -32,7 +36,8 @@ header {
     overflow: hidden;
     position: relative;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 .viewport {
@@ -65,14 +70,15 @@ header {
         opacity 0.4s ease;
 
     transform: scale(0.85);
-    opacity: 0.6;
+    opacity: 0.35;
+    filter: blur(0.5px);
 }
 
 .card.active{
     transform: scale(1.28);
     opacity: 1;
     width: 300px;
-    
+    filter: blur(0);
     z-index: 5;
 }
 
@@ -103,7 +109,7 @@ header {
     border: none;
     cursor: pointer;
     z-index: 10;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0,0,0,0.0);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -112,7 +118,7 @@ header {
 .nav svg {
     width: 40px;
     height: 40px;
-    stroke: white;
+    stroke: rgb(0, 0, 0);
     stroke-width: 2.5;
     fill: none;
 }
@@ -138,8 +144,16 @@ header {
 
 .categories li {
     padding: 8px 15px;
-    background: #eee;
+    background: white;
+    border: 1px solid #ddd;
+    transition: 0.3s;
     border-radius: 10px;
+}
+
+.categories li:hover {
+    background: #ff7a1a;
+    color: white;
+    transform: translateY(-2px);
 }
 
 .categories .active {
@@ -159,8 +173,17 @@ header {
     width: 200px;
     background: white;
     border-radius: 12px;
-    padding: 10px;
+    padding: 20px;
     text-align: center;
+}
+
+.product-card:hover {
+    width: 200px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transform: translateY(-4px);
 }
 
 .product-card img {
