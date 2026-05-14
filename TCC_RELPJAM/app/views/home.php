@@ -74,6 +74,101 @@ $base = "/TCC_RELPJAM";
 
 </section>
 
+<!--ESTOU ATUALIZANDO EM SCRIPT AQUI!!!! PRO CARROSSEL-->
+<script>
+
+    const track = document.getElementById("carouselTrack");
+    track.innerHTML += track.innerHTML;
+    const cards = track.querySelectorAll(".card");
+    
+    let currentIndex = cards.length / 2;
+    
+    function updateCarousel() {
+    
+        cards.forEach(card => {
+            card.classList.remove("active");
+        });
+    
+        cards[currentIndex].classList.add("active");
+    
+        const cardWidth = 260;
+        const gap = 20;
+    
+        const totalCardWidth = cardWidth + gap;
+    
+        const viewportWidth =
+            document.querySelector(".viewport").offsetWidth;
+    
+        const activeScale = 1.28;
+
+        const activeWidth =
+            cardWidth * activeScale;
+
+        const centerPosition =
+            (viewportWidth / 2) - (activeWidth / 2);
+    
+        const moveX =
+            (currentIndex * totalCardWidth);
+    
+        track.style.transform =
+            `translateX(${centerPosition - moveX + 30}px)`;
+    }
+    
+    function moveCarousel(direction) {
+
+        currentIndex += direction;
+
+        updateCarousel();
+
+        const half = cards.length / 2;
+
+        if (currentIndex >= cards.length - 1) {
+
+            setTimeout(() => {
+
+                track.style.transition = "none";
+
+                currentIndex = half;
+
+                updateCarousel();
+
+                requestAnimationFrame(() => {
+                    track.style.transition =
+                        "transform 0.4s ease";
+                });
+
+            }, 400);
+        }
+
+        if (currentIndex <= 0) {
+
+            setTimeout(() => {
+
+                track.style.transition = "none";
+
+                currentIndex = half;
+
+                updateCarousel();
+
+                requestAnimationFrame(() => {
+                    track.style.transition =
+                        "transform 0.4s ease";
+                });
+
+            }, 400);
+        }
+        }
+    
+    window.addEventListener("resize", updateCarousel);
+    
+    updateCarousel();
+    
+    setInterval(() => {
+        moveCarousel(1);
+    }, 10000);
+    
+    </script>
+
 <!-- ================= CATEGORIAS (NÃO MEXIDO) ================= -->
 <nav class="categories">
   <ul>
@@ -101,26 +196,7 @@ $base = "/TCC_RELPJAM";
   </div>
 </main>
 
-<script>
-let index = 0;
 
-function moveCarousel(dir) {
-    const track = document.getElementById("carouselTrack");
-    const cards = document.querySelectorAll(".card");
-
-    const gap = 20;
-    const cardWidth = cards[0].offsetWidth + gap;
-
-    const viewport = document.querySelector(".viewport");
-    const visible = Math.floor(viewport.offsetWidth / cardWidth);
-
-    const max = Math.max(0, cards.length - visible);
-
-    index = Math.max(0, Math.min(index + dir, max));
-
-    track.style.transform = `translateX(-${index * cardWidth}px)`;
-}
-</script>
 
 </body>
 </html>
