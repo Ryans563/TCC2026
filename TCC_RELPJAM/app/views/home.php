@@ -111,7 +111,7 @@ $base = "/TCC_RELPJAM";
             (currentIndex * totalCardWidth);
     
         track.style.transform =
-            `translateX(${centerPosition - moveX + 30}px)`;
+            `translateX(${centerPosition - moveX + 20}px)`;
     }
     
     function moveCarousel(direction) {
