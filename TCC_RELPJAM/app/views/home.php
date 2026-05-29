@@ -1,13 +1,49 @@
-<?php 
+<?php
+
 $base = "/TCC_RELPJAM";
+
+require_once "config.php"; 
+
+$sqlCategorias = $pdo->query("
+    SELECT *
+    FROM categorias
+    WHERE ativo = 1
+");
+
+$categorias = $sqlCategorias->fetchAll(PDO::FETCH_ASSOC);
+
+
+$sqlProdutos = $pdo->query("
+    SELECT 
+        produtos.id,
+        produtos.nome,
+        produtos.preco,
+        categorias.nome AS categoria,
+        produto_imagens.imagem
+
+    FROM produtos
+
+    INNER JOIN categorias
+        ON categorias.id = produtos.categoria_id
+
+    LEFT JOIN produto_imagens
+        ON produto_imagens.produto_id = produtos.id
+        AND produto_imagens.principal = 1
+
+    WHERE produtos.status = 'ativo'
+");
+
+$produtos = $sqlProdutos->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RELPJAM </title>
-<link rel="stylesheet" href="<?= $base ?>/public/assets/css/style.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -44,76 +80,25 @@ $base = "/TCC_RELPJAM";
 </div>
 
 <!-- ================= CATEGORIAS ================= -->
+
 <nav class="categorias">
     <ul>
-        <button class="btn-categoria" data-categoria="Todos">
-            <li class="ativo">Todos</li>
-        </button>
+        <li class="ativo"></li>
+            <button class="btn-categoria" data-categoria="Todos">
+                Todos
+            </button>
+        </li>
+            <?php foreach($categorias as $categoria): ?>
+        <li>
+            <button 
+                class="btn-categoria"
+                data-categoria="<?= strtolower($categoria['nome']) ?>"
+            >
+                <?= $categoria['nome'] ?>
+            </button>
+        </li>
+            <?php endforeach; ?>
 
-        <button class="btn-categoria" data-categoria="Esporte">
-            <li>Esporte</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Tecnologia">
-            <li>Tecnologia</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Acessorio">
-            <li>Acessorio</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Gamer">
-            <li>Gamer</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Esporte">
-            <li>Esporte</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Tecnologia">
-            <li>Tecnologia</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Acessorio">
-            <li>Acessorio</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Gamer">
-            <li>Gamer</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Esporte">
-            <li>Esporte</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Tecnologia">
-            <li>Tecnologia</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Acessorio">
-            <li>Acessorio</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Gamer">
-            <li>Gamer</li>
-        </button>
-
-
-        <button class="btn-categoria" data-categoria="Esporte">
-            <li>Esporte</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Tecnologia">
-            <li>Tecnologia</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Acessorio">
-            <li>Acessorio</li>
-        </button>
-
-        <button class="btn-categoria" data-categoria="Gamer">
-            <li>Gamer</li>
-        </button>
     </ul>
 </nav>
 
@@ -134,17 +119,6 @@ $base = "/TCC_RELPJAM";
         { nome: "Vans Old Skool", preco: "R$ 299,90", imagem: "<?= $base ?>/public/images/adidas1.png", emblema: "Popular" }
     ];
 
-    // DADOS DOS PRODUTOS
-    const itensProdutos = [
-        { nome: "Tenis Adidas Ultraboost", preco: "R$ 399,90",categoria: "Esporte", imagem: "<?= $base ?>/public/images/adidas1.png" },
-        { nome: "Nike Air Max 270", preco: "R$ 499,90",categoria: "Esporte", imagem: "<?= $base ?>/public/images/nike.png" },
-        { nome: "Camisa Tesla Edition", preco: "R$ 129,90", categoria: "Street", imagem: "<?= $base ?>/public/images/nike.png" },
-        { nome: "Tenis Air Jordan", preco: "R$ 699,90", categoria: "Esporte", imagem: "<?= $base ?>/public/images/nike.png" },
-        { nome: "Bota Coturno", preco: "R$ 259,90", categoria: "Camping", imagem: "<?= $base ?>/public/images/nike.png" },
-        { nome: "Mochila Gamer", preco: "R$ 189,90", categoria: "Acessorio", imagem: "<?= $base ?>/public/images/adidas1.png" },
-        { nome: "Fone Bluetooth", preco: "R$ 99,90", categoria: "Tecnologia", imagem: "<?= $base ?>/public/images/nike.png" },
-        { nome: "Smartwatch Pro", preco: "R$ 299,90", categoria: "Tecnologia", imagem: "<?= $base ?>/public/images/adidas1.png" }
-    ];
 
     // ELEMENTOS
     const track = document.getElementById("carrosselTrack");
@@ -285,24 +259,41 @@ $base = "/TCC_RELPJAM";
         }, 6000);
     }
 
-    // CONSTRUIR PRODUTOS
     function construirProdutos() {
-        const container = document.getElementById('containerProdutos');
-        container.innerHTML = '';
-        
-        itensProdutos.forEach(produto => {
-            const card = document.createElement('div');
-            card.className = 'produto-card';
-            card.innerHTML = `
-                <img src="${produto.imagem}" alt="${produto.nome}" 
-                     onerror="this.src='https://placehold.co/220x160/cccccc/666?text=RELPJAM'">
-                <p>${produto.nome}</p>
-                    <span class="produto-categoria">${produto.categoria}</span>
-                <div class="produto-preco">${produto.preco}</div>
-            `;
-            card.onclick = () => alert(`Produto: ${produto.nome}\nPreco: ${produto.preco}`);
-            container.appendChild(card);
-        });
+
+    const container = document.getElementById('containerProdutos');
+
+    container.innerHTML = `
+
+    <?php if(count($produtos) > 0): ?>
+
+        <?php foreach($produtos as $produto): ?>
+
+            <div class="produto-card">
+
+                <img 
+                    src="<?= $base ?>/public/images/<?= $produto['imagem'] ?>"
+                    alt="<?= $produto['nome'] ?>"
+                >
+
+                <p><?= $produto['nome'] ?></p>
+
+                <span class="produto-categoria">
+                    <?= $produto['categoria'] ?>
+                </span>
+
+                <div class="produto-preco">
+                    R$ <?= number_format($produto['preco'], 2, ',', '.') ?>
+                </div>
+
+            </div>
+
+        <?php endforeach; ?>
+
+
+    <?php endif; ?>
+
+    `;
     }
 
     // FUNCAO DE BUSCA
@@ -361,84 +352,80 @@ $base = "/TCC_RELPJAM";
 
     // ================= SCROLL COM ARRASTAR =================
 
-const sliderCategorias = document.querySelector('.categorias');
+    const sliderCategorias = document.querySelector('.categorias');
 
-let segurando = false;
-let inicioX;
-let scrollInicial;
+    let segurando = false;
+    let inicioX;
+    let scrollInicial;
 
-sliderCategorias.addEventListener('mousedown', (e) => {
-    segurando = true;
-    sliderCategorias.classList.add('ativo-scroll');
+    sliderCategorias.addEventListener('mousedown', (e) => {
+        segurando = true;
+        sliderCategorias.classList.add('ativo-scroll');
 
-    inicioX = e.pageX - sliderCategorias.offsetLeft;
-    scrollInicial = sliderCategorias.scrollLeft;
-});
+        inicioX = e.pageX - sliderCategorias.offsetLeft;
+        scrollInicial = sliderCategorias.scrollLeft;
+    });
 
-sliderCategorias.addEventListener('mouseleave', () => {
-    segurando = false;
-});
+    sliderCategorias.addEventListener('mouseleave', () => {
+        segurando = false;
+    });
 
-sliderCategorias.addEventListener('mouseup', () => {
-    segurando = false;
-});
+    sliderCategorias.addEventListener('mouseup', () => {
+        segurando = false;
+    });
 
-sliderCategorias.addEventListener('mousemove', (e) => {
-    if (!segurando) return;
+    sliderCategorias.addEventListener('mousemove', (e) => {
+        if (!segurando) return;
 
-    e.preventDefault();
+        e.preventDefault();
 
-    const x = e.pageX - sliderCategorias.offsetLeft;
-    const distancia = (x - inicioX) * 2;
+        const x = e.pageX - sliderCategorias.offsetLeft;
+        const distancia = (x - inicioX) * 2;
 
-    sliderCategorias.scrollLeft = scrollInicial - distancia;
-});
+        sliderCategorias.scrollLeft = scrollInicial - distancia;
+    });
 
 // ================= FILTRO POR CATEGORIA =================
 
-const botoesCategoria = document.querySelectorAll('.btn-categoria');
+    const botoesCategoria = document.querySelectorAll('.btn-categoria');
 
-botoesCategoria.forEach(botao => {
+    botoesCategoria.forEach(botao => {
 
-    botao.addEventListener('click', () => {
+        botao.addEventListener('click', () => {
 
-        // REMOVE ATIVO DE TODOS OS <li>
-        botoesCategoria.forEach(btn => {
-            btn.querySelector('li').classList.remove('ativo');
-        });
+            botoesCategoria.forEach(btn => {
+                btn.classList.remove('ativo');
+            });
 
-        // ADICIONA ATIVO NO <li> DO BOTAO CLICADO
-        botao.querySelector('li').classList.add('ativo');
+            botao.classList.add('ativo');
 
-        const categoria = botao.dataset.categoria.toLowerCase();
+            const categoria = botao.dataset.categoria.toLowerCase();
 
-        const produtos = document.querySelectorAll('.produto-card');
+            const produtos = document.querySelectorAll('.produto-card');
 
-        produtos.forEach(produto => {
+            produtos.forEach(produto => {
 
-            const nomeCategoria = produto
-                .querySelector('.produto-categoria')
-                ?.innerText
-                .toLowerCase();
+                const nomeCategoria = produto
+                    .querySelector('.produto-categoria')
+                    ?.innerText
+                    .toLowerCase();
 
-            // MOSTRAR TODOS
-            if (categoria === 'todos') {
-                produto.style.display = 'block';
-                return;
-            }
+                if (categoria === 'todos') {
+                    produto.style.display = 'block';
+                    return;
+                }
 
-            // FILTRAR
-            if (nomeCategoria.includes(categoria)) {
-                produto.style.display = 'block';
-            } else {
-                produto.style.display = 'none';
-            }
+                if (nomeCategoria.includes(categoria)) {
+                    produto.style.display = 'block';
+                } else {
+                    produto.style.display = 'none';
+                }
+
+            });
 
         });
 
     });
-
-});
 
     iniciar();
 </script>
