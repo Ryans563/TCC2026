@@ -1,1 +1,166 @@
 
+```css
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.cad-body{
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(
+        135deg,
+        #0f172a,
+        #1e293b
+    );
+    min-height:100vh;
+    color:white;
+    padding:40px 20px;
+}
+
+.cad-header{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.cad-logo{
+    font-size:2.7rem;
+    color:#00d9a5;
+}
+
+.cad-subtitle{
+    margin-top:10px;
+    color:#cbd5e1;
+}
+
+.cad-container{
+    width:100%;
+    max-width:1100px;
+    margin:auto;
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:30px;
+}
+
+.cad-card{
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(12px);
+    border-radius:20px;
+    padding:35px;
+    box-shadow:0 8px 30px rgba(0,0,0,.3);
+}
+
+.cad-title{
+    color:#00d9a5;
+    margin-bottom:30px;
+    font-size:1.8rem;
+}
+
+.cad-danger{
+    color:#ef4444;
+}
+
+.cad-form{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.cad-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.cad-label{
+    margin-bottom:8px;
+    color:#e2e8f0;
+}
+
+.cad-input{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#f1f5f9;
+    color:#333;
+    font-size:1rem;
+    transition:.3s;
+}
+
+.cad-input:focus{
+    outline:none;
+    border:2px solid #00d9a5;
+    box-shadow:0 0 10px rgba(0,217,165,.5);
+}
+
+.cad-btn{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    background:#00d9a5;
+    color:#0f172a;
+    font-weight:bold;
+    font-size:1rem;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.cad-btn:hover{
+    background:#00b386;
+    transform:translateY(-2px);
+}
+
+.cad-btn-danger{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    background:#ef4444;
+    color:white;
+    font-weight:bold;
+    font-size:1rem;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.cad-btn-danger:hover{
+    background:#dc2626;
+    transform:translateY(-2px);
+}
+
+.cad-link{
+    margin-top:20px;
+    text-align:center;
+}
+
+.cad-link a{
+    color:#00d9a5;
+    text-decoration:none;
+}
+
+.cad-link a:hover{
+    text-decoration:underline;
+}
+
+@media(max-width:900px){
+
+    .cad-container{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:500px){
+
+    .cad-logo{
+        font-size:2rem;
+    }
+
+    .cad-card{
+        padding:25px;
+    }
+
+}
+```
