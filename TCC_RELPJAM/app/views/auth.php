@@ -1,4 +1,4 @@
-```php
+
 <?php
 session_start();
 
@@ -99,7 +99,7 @@ if (isset($_POST['entrar'])) {
 
     <link
         rel="stylesheet"
-        href="css/auth.css">
+        href="public/assets/css/styleauth.css">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 
