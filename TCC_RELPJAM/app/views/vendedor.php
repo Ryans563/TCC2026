@@ -36,6 +36,28 @@ $sqlProdutos = $pdo->query("
 $produtos = $sqlProdutos->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
+<script>
+
+const produtosTop = <?= json_encode($topProdutos); ?>;
+
+document.querySelectorAll('.slider .item')
+.forEach((item,index)=>{
+
+    item.addEventListener('click',()=>{
+
+        const produto = produtosTop[index];
+
+        alert(
+            'Produto: ' + produto.nome +
+            '\nPreço: R$ ' + produto.preco +
+            '\nVendas: ' + produto.total_vendas
+        );
+
+    });
+
+});
+
+</script>
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -59,25 +81,34 @@ $produtos = $sqlProdutos->fetchAll(PDO::FETCH_ASSOC);
 </header>
 
 <!-- ================= CARROSSEL ================= -->
-<div class="carrossel-container">
-    <button class="carrossel-btn btn-prev" id="btnPrev">
-        <svg viewBox="0 0 24 24">
-            <path d="M15 18l-6-6 6-6"></path>
-        </svg>
-    </button>
+<section class="top-vendas-section">
 
-    <div class="carrossel-wrapper">
-        <div class="carrossel-track" id="carrosselTrack"></div>
+    <h2>Produtos Mais Vendidos</h2>
+
+    <div class="banner">
+
+        <div class="slider"
+             style="--quantity: <?= count($topProdutos) ?>">
+
+            <?php foreach($topProdutos as $index => $produto): ?>
+
+                <div class="item"
+                     style="--position: <?= $index + 1 ?>">
+
+                    <img
+                        src="<?= htmlspecialchars($produto['imagem']) ?>"
+                        alt="<?= htmlspecialchars($produto['nome']) ?>"
+                    >
+
+                </div>
+
+            <?php endforeach; ?>
+
+        </div>
+
     </div>
 
-    <button class="carrossel-btn btn-next" id="btnNext">
-        <svg viewBox="0 0 24 24">
-            <path d="M9 6l6 6-6 6"></path>
-        </svg>
-    </button>
-
-    <div class="carrossel-indicadores" id="carrosselIndicadores"></div>
-</div>
+</section>
 
 <!-- ================= CATEGORIAS ================= -->
 
