@@ -27,23 +27,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $slug = preg_replace('/-+/', '-', $slug);
 
     // IMAGEM
-    $imagemNome = null;
+    $imagemUrl = null;
 
-    if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] == 0) {
+        if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] == 0) {
 
-        $pasta = "public/images/";
+            $fileTmp = $_FILES['imagem']['tmp_name'];
+            $fileName = uniqid() . '-' . basename($_FILES['imagem']['name']);
+            $fileData = file_get_contents($fileTmp);
 
-        if (!is_dir($pasta)) {
-            mkdir($pasta, 0777, true);
+            $supabaseUrl = "https://enkfnnaebiiqyycmegyp.supabase.co";
+            $bucket = "produtos";
+            $key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVua2ZubmFlYmlpcXl5Y21lZ3lwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTA2OTQ3NiwiZXhwIjoyMDk2NjQ1NDc2fQ.dsa2_kej67S5GG_lAXCw3nrSrg7Mvz5xNx_0KNTlMF0";
+
+            $uploadUrl = $supabaseUrl . "/storage/v1/object/" . $bucket . "/" . $fileName;
+
+            $ch = curl_init($uploadUrl);
+
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                "Authorization: Bearer $key",
+                "Content-Type: application/octet-stream",
+                "x-upsert: true"
+            ]);
+
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $fileData);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            curl_close($ch);
+
+            if ($httpCode == 200 || $httpCode == 201) {
+                $imagemUrl = $supabaseUrl . "/storage/v1/object/public/" . $bucket . "/" . $fileName;
+            } else {
+                die("Erro upload Supabase: " . $response);
+            }
         }
-
-        $imagemNome = uniqid() . '-' . $_FILES['imagem']['name'];
-
-        move_uploaded_file(
-            $_FILES['imagem']['tmp_name'],
-            $pasta . $imagemNome
-        );
-    }
 
     try {
 
@@ -85,12 +106,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':preco' => $preco,
             ':estoque' => $estoque,
             ':marca' => $marca
+            
         ]);
 
         $produto_id = $pdo->lastInsertId();
-
         // INSERIR IMAGEM
-        if ($imagemNome) {
+        if ($imagemUrl) {
 
             $sqlImagem = $pdo->prepare("
                 INSERT INTO produto_imagens (
@@ -101,13 +122,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 VALUES (
                     :produto_id,
                     :imagem,
-                    1
+                    true
                 )
             ");
 
             $sqlImagem->execute([
                 ':produto_id' => $produto_id,
-                ':imagem' => $imagemNome
+                ':imagem' => $imagemUrl
             ]);
         }
 
