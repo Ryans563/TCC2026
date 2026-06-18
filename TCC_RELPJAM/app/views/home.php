@@ -10,6 +10,15 @@ $sqlCategorias = $pdo->query("
     WHERE ativo = TRUE
 ");
 
+$sqlCarrossel = $pdo->query("
+    SELECT *
+    FROM carrossel_imagens
+    WHERE ativo = TRUE
+    ORDER BY ordem ASC
+");
+
+$carrossel = $sqlCarrossel->fetchAll(PDO::FETCH_ASSOC);
+
 $categorias = $sqlCategorias->fetchAll(PDO::FETCH_ASSOC);
 
 
@@ -26,9 +35,9 @@ $sqlProdutos = $pdo->query("
     INNER JOIN categorias
         ON categorias.id = produtos.categoria_id
 
-   LEFT JOIN produto_imagens
-    ON produto_imagens.produto_id = produtos.id
-    AND produto_imagens.principal = TRUE
+    LEFT JOIN produto_imagens
+        ON produto_imagens.produto_id = produtos.id
+        AND produto_imagens.principal = TRUE
 
     WHERE produtos.status = 'ativo'
 ");
@@ -53,7 +62,8 @@ $produtos = $sqlProdutos->fetchAll(PDO::FETCH_ASSOC);
         <input type="text" id="campoBusca" placeholder="Buscar Produtos">
     </div>
     <div class="icones">
-        <a href="carrinho.php">Carrinho</a>
+        
+        <a>Carrinho</a>
         <a href="myaccount.php">Perfil</a>
     </div>
 </header>
@@ -83,22 +93,22 @@ $produtos = $sqlProdutos->fetchAll(PDO::FETCH_ASSOC);
 
 <nav class="categorias">
     <ul>
-        <li>
-            <button class="btn-categoria ativo" data-categoria="todos">
+        <li class="ativo"></li>
+            <button class="btn-categoria" data-categoria="Todos">
                 Todos
             </button>
         </li>
+            <?php foreach($categorias as $categoria): ?>
+        <li>
+            <button 
+                class="btn-categoria"
+                data-categoria="<?= strtolower($categoria['nome']) ?>"
+            >
+                <?= $categoria['nome'] ?>
+            </button>
+        </li>
+            <?php endforeach; ?>
 
-        <?php foreach($categorias as $categoria): ?>
-            <li>
-                <button
-                    class="btn-categoria"
-                    data-categoria="<?= strtolower($categoria['nome']) ?>"
-                >
-                    <?= $categoria['nome'] ?>
-                </button>
-            </li>
-        <?php endforeach; ?>
     </ul>
 </nav>
 
@@ -107,18 +117,15 @@ $produtos = $sqlProdutos->fetchAll(PDO::FETCH_ASSOC);
 
 <script>
 
-    // DADOS DO CARROSSEL
-    const itensCarrossel = [
-        { nome: "Adidas Ultraboost", preco: "R$ 399,90", imagem: "<?= $base ?>/public/images/adidas1.png", emblema: "Lancamento" },
-        { nome: "Nike Air Max", preco: "R$ 499,90", imagem: "<?= $base ?>/public/images/nike.png", emblema: "Mais Vendido" },
-        { nome: "Tesla Edition", preco: "R$ 129,90", imagem: "<?= $base ?>/public/images/destaque1.png", emblema: "Exclusivo" },
-        { nome: "Camisa Babylook", preco: "R$ 599,90", imagem: "<?= $base ?>/public/images/destaque2.png", emblema: "Limitado" },
-        { nome: "Botas Premium", preco: "R$ 259,90", imagem: "<?= $base ?>/public/images/destaque3.png", emblema: "Oferta" },
-        { nome: "Jordan Retro", preco: "R$ 699,90", imagem: "<?= $base ?>/public/images/destaque4.png", emblema: "Mais Vendido" },
-        { nome: "Puma Suede", preco: "R$ 349,90", imagem: "<?= $base ?>/public/images/destaque5.png", emblema: "Promocao" },
-        { nome: "Vans Old Skool", preco: "R$ 299,90", imagem: "<?= $base ?>/public/images/destaque6.png", emblema: "Popular" }
+const itensCarrossel = <?= json_encode(array_map(function($item){
+    return [
+        "nome" => $item["titulo"],
+        "preco" => "",
+        "imagem" => $item["imagem"],
+        "emblema" => "Destaque"
     ];
-
+}, $carrossel), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+        
 
     // ELEMENTOS
     const track = document.getElementById("carrosselTrack");
@@ -265,16 +272,11 @@ $produtos = $sqlProdutos->fetchAll(PDO::FETCH_ASSOC);
 
     container.innerHTML = `
 
-    <?php if(count($produtos) > 0): ?>
-
         <?php foreach($produtos as $produto): ?>
 
             <div class="produto-card">
 
-                <img 
-                    src="<?= $base ?>/public/images/<?= $produto['imagem'] ?>"
-                    alt="<?= $produto['nome'] ?>"
-                >
+                <img src="<?= $produto['imagem'] ?>">
 
                 <p><?= $produto['nome'] ?></p>
 
@@ -290,8 +292,6 @@ $produtos = $sqlProdutos->fetchAll(PDO::FETCH_ASSOC);
 
         <?php endforeach; ?>
 
-
-    <?php endif; ?>
 
     `;
     }
