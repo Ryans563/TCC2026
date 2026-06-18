@@ -10,6 +10,15 @@ $sqlCategorias = $pdo->query("
     WHERE ativo = TRUE
 ");
 
+$sqlCarrossel = $pdo->query("
+    SELECT *
+    FROM carrossel_imagens
+    WHERE ativo = TRUE
+    ORDER BY ordem ASC
+");
+
+$carrossel = $sqlCarrossel->fetchAll(PDO::FETCH_ASSOC);
+
 $categorias = $sqlCategorias->fetchAll(PDO::FETCH_ASSOC);
 
 
@@ -36,28 +45,6 @@ $sqlProdutos = $pdo->query("
 $produtos = $sqlProdutos->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
-<script>
-
-const produtosTop = <?= json_encode($topProdutos); ?>;
-
-document.querySelectorAll('.slider .item')
-.forEach((item,index)=>{
-
-    item.addEventListener('click',()=>{
-
-        const produto = produtosTop[index];
-
-        alert(
-            'Produto: ' + produto.nome +
-            '\nPreço: R$ ' + produto.preco +
-            '\nVendas: ' + produto.total_vendas
-        );
-
-    });
-
-});
-
-</script>
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -75,40 +62,31 @@ document.querySelectorAll('.slider .item')
         <input type="text" id="campoBusca" placeholder="Buscar Produtos">
     </div>
     <div class="icones">
-        <span>Carrinho</span>
+        
         <span>Perfil</span>
     </div>
 </header>
 
 <!-- ================= CARROSSEL ================= -->
-<section class="top-vendas-section">
+<div class="carrossel-container">
+    <button class="carrossel-btn btn-prev" id="btnPrev">
+        <svg viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6"></path>
+        </svg>
+    </button>
 
-    <h2>Produtos Mais Vendidos</h2>
-
-    <div class="banner">
-
-        <div class="slider"
-             style="--quantity: <?= count($topProdutos) ?>">
-
-            <?php foreach($topProdutos as $index => $produto): ?>
-
-                <div class="item"
-                     style="--position: <?= $index + 1 ?>">
-
-                    <img
-                        src="<?= htmlspecialchars($produto['imagem']) ?>"
-                        alt="<?= htmlspecialchars($produto['nome']) ?>"
-                    >
-
-                </div>
-
-            <?php endforeach; ?>
-
-        </div>
-
+    <div class="carrossel-wrapper">
+        <div class="carrossel-track" id="carrosselTrack"></div>
     </div>
 
-</section>
+    <button class="carrossel-btn btn-next" id="btnNext">
+        <svg viewBox="0 0 24 24">
+            <path d="M9 6l6 6-6 6"></path>
+        </svg>
+    </button>
+
+    <div class="carrossel-indicadores" id="carrosselIndicadores"></div>
+</div>
 
 <!-- ================= CATEGORIAS ================= -->
 
@@ -138,18 +116,15 @@ document.querySelectorAll('.slider .item')
 
 <script>
 
-    // DADOS DO CARROSSEL
-    const itensCarrossel = [
-        { nome: "Adidas Ultraboost", preco: "R$ 399,90", imagem: "<?= $base ?>/public/images/adidas1.png", emblema: "Lancamento" },
-        { nome: "Nike Air Max", preco: "R$ 499,90", imagem: "<?= $base ?>/public/images/nike.png", emblema: "Mais Vendido" },
-        { nome: "Tesla Edition", preco: "R$ 129,90", imagem: "<?= $base ?>/public/images/nike.png", emblema: "Exclusivo" },
-        { nome: "Air270", preco: "R$ 599,90", imagem: "<?= $base ?>/public/images/nike.png", emblema: "Limitado" },
-        { nome: "Botas Premium", preco: "R$ 259,90", imagem: "<?= $base ?>/public/images/nike.png", emblema: "Oferta" },
-        { nome: "Jordan Retro", preco: "R$ 699,90", imagem: "<?= $base ?>/public/images/adidas1.png", emblema: "Mais Vendido" },
-        { nome: "Puma Suede", preco: "R$ 349,90", imagem: "<?= $base ?>/public/images/nike.png", emblema: "Promocao" },
-        { nome: "Vans Old Skool", preco: "R$ 299,90", imagem: "<?= $base ?>/public/images/adidas1.png", emblema: "Popular" }
+const itensCarrossel = <?= json_encode(array_map(function($item){
+    return [
+        "nome" => $item["titulo"],
+        "preco" => "",
+        "imagem" => $item["imagem"],
+        "emblema" => "Destaque"
     ];
-
+}, $carrossel), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+        
 
     // ELEMENTOS
     const track = document.getElementById("carrosselTrack");
@@ -300,10 +275,7 @@ document.querySelectorAll('.slider .item')
 
             <div class="produto-card">
 
-                <img 
-                    src="<?= $base ?>/public/images/<?= $produto['imagem'] ?>"
-                    alt="<?= $produto['nome'] ?>"
-                >
+                <img src="<?= $produto['imagem'] ?>">
 
                 <p><?= $produto['nome'] ?></p>
 
