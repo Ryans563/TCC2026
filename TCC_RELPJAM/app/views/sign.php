@@ -60,8 +60,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     ");
 
                     $update->bindParam(':id', $usuario['id']);
-
                     $update->execute();
+
+                    // VERIFICA SE É VENDEDOR ATIVO
+                    $checkVendedor = $pdo->prepare("
+                        SELECT status
+                        FROM vendedores
+                        WHERE usuario_id = :usuario_id
+                        LIMIT 1
+                    ");
+
+                    $checkVendedor->bindParam(':usuario_id', $usuario['id']);
+                    $checkVendedor->execute();
+
+                    $vendedor = $checkVendedor->fetch();
+
+                    if ($vendedor && $vendedor['status'] === 'ativo') {
+                        header("Location: vendedor.php");
+                        exit;
+                    }
 
                     header("Location: home.php");
                     exit;
