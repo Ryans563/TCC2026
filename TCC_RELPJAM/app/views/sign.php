@@ -1,4 +1,3 @@
-
 <?php
 
 require_once __DIR__ . '/config.php';
@@ -60,8 +59,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     ");
 
                     $update->bindParam(':id', $usuario['id']);
-
                     $update->execute();
+
+                    // VERIFICA SE É VENDEDOR ATIVO
+                    $checkVendedor = $pdo->prepare("
+                        SELECT status
+                        FROM vendedores
+                        WHERE usuario_id = :usuario_id
+                        LIMIT 1
+                    ");
+
+                    $checkVendedor->bindParam(':usuario_id', $usuario['id']);
+                    $checkVendedor->execute();
+
+                    $vendedor = $checkVendedor->fetch();
+
+                    if ($vendedor && $vendedor['status'] === 'ativo') {
+                        header("Location: vendedor.php");
+                        exit;
+                    }
 
                     header("Location: home.php");
                     exit;
@@ -306,9 +322,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                 required
             >
 
-            <a href="/TCC_RELPJAM/app/views/senhaesquece.php">
-    Esqueceu a senha?
-</a>
+            <a href="#">
+                Esqueceu sua senha?
+            </a>
 
             <button type="submit" name="login">
                 Entrar
@@ -384,3 +400,178 @@ loginBtn.addEventListener('click', () => {
 </body>
 </html>
 
+
+===============uni
+
+
+<?php
+
+require_once __DIR__ . '/config.php';
+
+$erro = "";
+$sucesso = "";
+
+/*
+|--------------------------------------------------------------------------
+| PROCESSAMENTO
+|--------------------------------------------------------------------------
+*/
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOGIN
+    |--------------------------------------------------------------------------
+    */
+
+    if (isset($_POST['login'])) {
+
+        $email = trim($_POST['loginEmail'] ?? '');
+        $senha = trim($_POST['loginPassword'] ?? '');
+
+        try {
+
+            $sql = "
+                SELECT *
+                FROM usuarios
+                WHERE email = :email
+                LIMIT 1
+            ";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':email', $email);
+            $stmt->execute();
+
+            $usuario = $stmt->fetch();
+
+            // VERIFICA USUÁRIO
+            if ($usuario) {
+
+                // VERIFICA SENHA
+                if (password_verify($senha, $usuario['senha_hash'])) {
+
+                    $_SESSION['usuario_id'] = $usuario['id'];
+                    $_SESSION['usuario_nome'] = $usuario['nome'];
+                    $_SESSION['usuario_email'] = $usuario['email'];
+
+                    // ATUALIZA ÚLTIMO LOGIN
+                    $update = $pdo->prepare("
+                        UPDATE usuarios
+                        SET ultimo_login = NOW()
+                        WHERE id = :id
+                    ");
+
+                    $update->bindParam(':id', $usuario['id']);
+                    $update->execute();
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | VERIFICA SE É VENDEDOR ATIVO
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $checkVendedor = $pdo->prepare("
+                        SELECT status
+                        FROM vendedores
+                        WHERE usuario_id = :usuario_id
+                        LIMIT 1
+                    ");
+
+                    $checkVendedor->bindParam(':usuario_id', $usuario['id']);
+                    $checkVendedor->execute();
+
+                    $vendedor = $checkVendedor->fetch();
+
+                    if ($vendedor && $vendedor['status'] === 'ativo') {
+                        header("Location: vendedor.php");
+                        exit;
+                    }
+
+                    // SE NÃO FOR VENDEDOR
+                    header("Location: home.php");
+                    exit;
+
+                } else {
+                    $erro = "Senha inválida!";
+                }
+
+            } else {
+                $erro = "Usuário não encontrado!";
+            }
+
+        } catch (PDOException $e) {
+            $erro = "Erro ao realizar login!";
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CADASTRO
+    |--------------------------------------------------------------------------
+    */
+
+    if (isset($_POST['signup'])) {
+
+        $nome  = trim($_POST['signupName'] ?? '');
+        $email = trim($_POST['signupEmail'] ?? '');
+        $senha = trim($_POST['signupPassword'] ?? '');
+
+        try {
+
+            $check = $pdo->prepare("
+                SELECT id
+                FROM usuarios
+                WHERE email = :email
+                LIMIT 1
+            ");
+
+            $check->bindParam(':email', $email);
+            $check->execute();
+
+            if ($check->fetch()) {
+
+                $erro = "Este e-mail já está cadastrado!";
+
+            } else {
+
+                $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+
+                $insert = $pdo->prepare("
+                    INSERT INTO usuarios
+                    (
+                        nome,
+                        email,
+                        senha_hash,
+                        tipo_usuario,
+                        status,
+                        created_at,
+                        updated_at
+                    )
+                    VALUES
+                    (
+                        :nome,
+                        :email,
+                        :senha_hash,
+                        'cliente',
+                        'ativo',
+                        NOW(),
+                        NOW()
+                    )
+                ");
+
+                $insert->bindParam(':nome', $nome);
+                $insert->bindParam(':email', $email);
+                $insert->bindParam(':senha_hash', $senhaHash);
+
+                $insert->execute();
+
+                $sucesso = "Cadastro realizado com sucesso!";
+            }
+
+        } catch (PDOException $e) {
+            $erro = "Erro ao cadastrar usuário!";
+        }
+    }
+}
+?>
