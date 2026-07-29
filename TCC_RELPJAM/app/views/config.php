@@ -27,27 +27,22 @@ if (!file_exists($envPath)) {
 
 $env = parse_ini_file($envPath);
 
-
 if ($env === false) {
     die("ERRO: .env inválido");
 }
 
-// Variáveis da API do Supabase
 $SUPABASE_URL = $env['SUPABASE_URL'] ?? null;
 $SUPABASE_KEY = $env['SUPABASE_KEY'] ?? null;
+
 
 /* =========================
    BANCO
 ========================= */
-$host = $env['DB_HOST'] ?? null;
-$port = $env['DB_PORT'] ?? '5432';
-$db   = $env['DB_NAME'] ?? null;
-$user = $env['DB_USER'] ?? null;
-$pass = $env['DB_PASS'] ?? null;
-
-if (!$host || !$db || !$user || !$pass) {
-    die("ERRO: Variáveis do banco não encontradas no .env");
-}
+$host = 'aws-1-us-west-2.pooler.supabase.com';
+$port = '5432';
+$db   = 'postgres';
+$user = 'postgres.enkfnnaebiiqyycmegyp';
+$pass = 'KU74wvnR7Zd4x6VeEoaZ';
 
 try {
 

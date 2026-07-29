@@ -1,8 +1,32 @@
 
 <?php
 
+$host = 'aws-1-us-west-2.pooler.supabase.com';
+$port = '5432';
+$db   = 'postgres';
+$user = 'postgres.enkfnnaebiiqyycmegyp';
+$pass = 'KU74wvnR7Zd4x6VeEoaZ';
 
-require_once __DIR__ . '/../views/config.php';
+try {
+
+    $pdo = new PDO(
+        "pgsql:host=$host;port=$port;dbname=$db;sslmode=require",
+        $user,
+        $pass
+    );
+
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    echo "Conectado com sucesso!";
+
+} catch (PDOException $e) {
+
+    die("Erro na conexão: " . $e->getMessage());
+
+}
+
+$mensagem = '';
+$tipoMensagem = '';
 
 if (isset($_POST['entrar'])) {
 
