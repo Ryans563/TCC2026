@@ -1,0 +1,570 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Montserrat',sans-serif;
+}
+
+/* =========================
+   BODY (UNIFICADO)
+========================= */
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    overflow:hidden;
+    position:relative;
+
+    background:
+    radial-gradient(circle at top left,#214c9d 0%,transparent 40%),
+    radial-gradient(circle at bottom right,#0d1b33 0%,transparent 40%),
+    linear-gradient(135deg,#02070f,#061528,#081d3b,#000814);
+
+    background-size:300% 300%;
+
+    animation:bgMove 18s ease infinite;
+}
+
+@keyframes bgMove{
+
+    0%{
+        background-position:0% 50%;
+    }
+
+    50%{
+        background-position:100% 50%;
+    }
+
+    100%{
+        background-position:0% 50%;
+    }
+
+}
+body::before{
+
+    content:"";
+
+    position:fixed;
+
+    inset:0;
+
+    background-image:
+
+        linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),
+
+        linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+
+    background-size:60px 60px;
+
+    transform:perspective(800px) rotateX(70deg);
+
+    transform-origin:top;
+
+    opacity:.3;
+
+    animation:gridMove 12s linear infinite;
+
+}
+
+@keyframes gridMove{
+
+    from{
+
+        background-position:0 0;
+
+    }
+
+    to{
+
+        background-position:0 60px;
+
+    }
+
+}
+body::after{
+
+    content:"";
+
+    position:fixed;
+
+    width:900px;
+
+    height:900px;
+
+    border-radius:50%;
+
+    left:-200px;
+
+    top:-250px;
+
+    background:
+
+    radial-gradient(circle,
+    rgba(0,140,255,.35),
+    transparent 70%);
+
+    filter:blur(90px);
+
+    animation:blob 14s ease-in-out infinite;
+
+}
+
+@keyframes blob{
+
+    0%{
+
+        transform:translate(0,0) scale(1);
+
+    }
+
+    50%{
+
+        transform:translate(180px,100px) scale(1.3);
+
+    }
+
+    100%{
+
+        transform:translate(0,0) scale(1);
+
+    }
+
+}
+/* =========================
+   CANVAS RELPJAM
+========================= */
+#relpjamCanvas{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:250px;
+    z-index:0;
+    pointer-events:none;
+    
+        top:0;
+        transform: translateY(-10px);
+    
+}
+
+/* =========================
+   CONTAINER LOGIN
+========================= */
+.container{
+
+    position:relative;
+
+    z-index:50;
+
+    backdrop-filter:blur(25px);
+
+    background:rgba(255,255,255,.93);
+
+    border:1px solid rgba(255,255,255,.15);
+
+    box-shadow:
+
+    0 40px 80px rgba(0,0,0,.45),
+
+    0 0 80px rgba(0,110,255,.15);
+
+}
+.container::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:-2px;
+
+    z-index:-1;
+
+    border-radius:35px;
+
+    background:
+
+    linear-gradient(
+    45deg,
+
+    #005eff,
+
+    #009dff,
+
+    #7dd3fc,
+
+    #005eff
+
+    );
+
+    background-size:400%;
+
+    filter:blur(25px);
+
+    opacity:.55;
+
+    animation:borderGlow 12s linear infinite;
+
+}
+
+@keyframes borderGlow{
+
+    from{
+
+        background-position:0%;
+
+    }
+
+    to{
+
+        background-position:400%;
+
+    }
+
+}
+.star{
+
+    position:absolute;
+
+    width:3px;
+
+    height:3px;
+
+    background:white;
+
+    border-radius:50%;
+
+    animation:twinkle 2s infinite alternate;
+
+}
+
+@keyframes twinkle{
+
+    from{
+
+        opacity:.2;
+        transform:scale(.6);
+
+    }
+
+    to{
+
+        opacity:1;
+        transform:scale(1.6);
+
+    }
+
+}
+body{
+
+    --x:50%;
+
+    --y:50%;
+
+}
+body::selection{
+    background:#4fa3ff;
+}
+.mouse-light{
+
+    position:fixed;
+
+    inset:0;
+
+    pointer-events:none;
+
+    background:
+
+    radial-gradient(circle at var(--x) var(--y),
+
+    rgba(0,140,255,.18),
+
+    transparent 280px);
+
+}.container{
+
+    animation:float 7s ease-in-out infinite;
+
+}
+
+@keyframes float{
+
+    0%{
+
+        transform:translateY(0);
+
+    }
+
+    50%{
+
+        transform:translateY(-8px);
+
+    }
+
+    100%{
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* =========================
+   FORMULÁRIOS
+========================= */
+.form-container{
+    position:absolute;
+    top:0;
+    height:100%;
+    transition:all .6s ease-in-out;
+}
+
+.sign-in-container{
+    left:0;
+    width:50%;
+    z-index:2;
+}
+
+.sign-up-container{
+    left:0;
+    width:50%;
+    opacity:0;
+    z-index:1;
+}
+
+.container.active .sign-in-container{
+    transform:translateX(100%);
+}
+
+.container.active .sign-up-container{
+    transform:translateX(100%);
+    opacity:1;
+    z-index:5;
+}
+
+/* =========================
+   FORM
+========================= */
+form{
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    height:100%;
+    padding:0 40px;
+    text-align:center;
+}
+
+h1{
+    margin-bottom:10px;
+}
+
+span{
+    font-size:12px;
+}
+
+input{
+    width:100%;
+    margin:8px 0;
+    padding:12px 15px;
+    border:none;
+    border-radius:8px;
+    background:#eee;
+    outline:none;
+}
+
+button{
+    margin-top:15px;
+    padding:12px 45px;
+    border:none;
+    border-radius:8px;
+    background:#1f2937;
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+}
+
+button.hidden{
+    background:transparent;
+    border:1px solid #fff;
+}
+
+/* =========================
+   SOCIAL ICONS
+========================= */
+.social-icons{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin:20px 0;
+}
+
+.social-icons .icon{
+    width:40px;
+    height:40px;
+    border:1px solid #ccc;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#333;
+    text-decoration:none;
+}
+
+/* =========================
+   TOGGLE PAINEL
+========================= */
+.toggle-container{
+    position:absolute;
+    top:0;
+    left:50%;
+    width:50%;
+    height:100%;
+    overflow:hidden;
+    transition:all .6s ease-in-out;
+    border-radius:150px 0 0 100px;
+    z-index:1000;
+}
+
+.container.active .toggle-container{
+    transform:translateX(-100%);
+    border-radius:0 150px 100px 0;
+}
+
+.toggle{
+    position:relative;
+    left:-100%;
+    width:200%;
+    height:100%;
+    color:#ff8c00;
+    background:linear-gradient(to right,#1f2937,#2c4894);
+    transition:all .6s ease-in-out;
+}
+
+.container.active .toggle{
+    transform:translateX(50%);
+}
+
+.toggle-panel{
+    position:absolute;
+    width:50%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:0 30px;
+}
+
+.toggle-left{
+    transform:translateX(-200%);
+}
+
+.container.active .toggle-left{
+    transform:translateX(0);
+}
+
+.toggle-right{
+    right:0;
+}
+
+.container.active .toggle-right{
+    transform:translateX(200%);
+}
+
+/* =========================
+   GOOGLE USER BOX
+========================= */
+#google-user-box{
+    position:fixed;
+    top:20px;
+    right:20px;
+    background:#fff;
+    padding:10px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.2);
+    display:flex;
+    gap:10px;
+    align-items:center;
+    z-index:9999;
+}
+
+#google-user-box img{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+}
+
+#google-user-box span{
+    display:block;
+}
+
+/* =========================
+   RESPONSIVO
+========================= */
+@media (max-width:768px){
+
+    body{
+        padding-top:160px;
+        align-items:flex-start;
+    }
+
+    #relpjamCanvas{
+        height:140px;
+    }
+
+    .container{
+        width:100%;
+        min-height:auto;
+        border-radius:20px;
+    }
+
+    .toggle-container{
+        display:none;
+    }
+
+    .sign-in-container,
+    .sign-up-container{
+        position:relative;
+        width:100%;
+        height:auto;
+    }
+
+    .container.active .sign-in-container,
+    .container.active .sign-up-container{
+        transform:none;
+    }
+
+    form{
+        padding:30px 20px;
+    }
+
+    h1{
+        font-size:1.6rem;
+    }
+
+    input{
+        font-size:16px;
+        padding:14px;
+    }
+
+    button{
+        width:100%;
+        max-width:320px;
+    }
+
+    .social-icons{
+        flex-wrap:wrap;
+    }
+
+    #google-user-box{
+        top:10px;
+        right:10px;
+        max-width:90%;
+    }
+}
