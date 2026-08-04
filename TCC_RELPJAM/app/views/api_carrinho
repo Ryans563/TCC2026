@@ -1,1 +1,19 @@
+<?php
+require_once "config.php";
+header('Content-Type: application/json');
 
+$id = $_POST['id'] ?? null;
+$acao = $_POST['acao'] ?? null;
+$usuario_id = $_SESSION['usuario_id'] ?? 1;
+
+if ($id && $acao) {
+    if ($acao === 'atualizar') {
+        $qtd = (int)$_POST['quantidade'];
+        $stmt = $pdo->prepare("UPDATE carrinho_usuario SET quantidade = ? WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$qtd, $id, $usuario_id]);
+    } elseif ($acao === 'remover') {
+        $stmt = $pdo->prepare("DELETE FROM carrinho_usuario WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$id, $usuario_id]);
+    }
+    echo json_encode(['status' => 'sucesso']);
+}
