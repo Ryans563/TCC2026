@@ -17,3 +17,4 @@ if ($id && $acao) {
     }
     echo json_encode(['status' => 'sucesso']);
 }
+?>
