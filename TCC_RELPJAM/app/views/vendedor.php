@@ -55,15 +55,132 @@ $produtos = $sqlProdutos->fetchAll(PDO::FETCH_ASSOC);
 <link rel="stylesheet" href="<?= $base ?>/public/assets/css/style.css">
 </head>
 <body>
+    <style>
+        /* RESET */
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
 
-<header>
-    <div class="logo">RELPJAM</div>
+/* HEADER */
+header{
+    width: 100%;
+    height: 75px;
+    background: rgba(25, 25, 25, 0.95);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 60px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.25);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* LOGO */
+.logo{
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff9800;
+    letter-spacing: 2px;
+    cursor: pointer;
+}
+
+/* PESQUISA */
+.pesquisa{
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 0 40px;
+}
+
+.pesquisa input{
+    width: 100%;
+    max-width: 500px;
+    height: 45px;
+    border: none;
+    outline: none;
+    border-radius: 30px;
+    padding: 0 20px;
+    font-size: 16px;
+    background: #fff;
+    transition: .3s;
+}
+
+.pesquisa input:focus{
+    box-shadow: 0 0 0 3px rgba(255,152,0,.35);
+}
+
+/* LINKS */
+.icones{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.icones a{
+    text-decoration: none;
+}
+
+.icones span{
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 30px;
+    background: #ff9800;
+    color: white;
+    font-weight: 600;
+    transition: .3s;
+}
+
+.icones span:hover{
+    background: #e68900;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255,152,0,.35);
+}
+
+/* RESPONSIVO */
+@media(max-width:900px){
+
+    header{
+        flex-direction: column;
+        height: auto;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .pesquisa{
+        width: 100%;
+        padding: 0;
+    }
+
+    .pesquisa input{
+        max-width: 100%;
+    }
+
+    .icones{
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .icones span{
+        width: 180px;
+        text-align: center;
+    }
+
+}
+    </style>
+<header style="">
+    <div class="logo">Minha Loja</div>
     <div class="pesquisa">
         <input type="text" id="campoBusca" placeholder="Buscar Produtos">
     </div>
     <div class="icones">
-        
-        <span>Perfil</span>
+         <a href="home.php"><span>Voltar Para Marketplace</span></a>
+        <a href="/perfil_vend.php"><span>Perfil</span></a>
     </div>
 </header>
 
@@ -286,18 +403,43 @@ const itensCarrossel = <?= json_encode(array_map(function($item){
                 <div class="produto-preco">
                     R$ <?= number_format($produto['preco'], 2, ',', '.') ?>
                 </div>
+                <div class="produto-remove">
+                   <a href="add_produto.php"
+   style="
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      width:120px;
+      height:40px;
+      margin:20px auto;
+      text-decoration:none;
+      background:#ff9800;
+      border:none;
+      border-radius:8px;
+      color:#fff;
+      font-size:16px;
+      font-weight:600;
+      text-align:center;
+      cursor:pointer;
+      box-shadow:0 2px 10px rgba(0,0,0,.08);
+   ">
+   <span>Editar</span></a>
+                </div>
 
             </div>
 
         <?php endforeach; ?>
 
-        <a href="add_produto.php" class="produto-add-card">
+      <a href="add_produto.php"
+   style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:15px; width:250px; height:300px; text-decoration:none; background:#ffffff; border:2px dashed #ff9800; border-radius:15px; color:#ff9800; font-size:18px; font-weight:600; cursor:pointer; transition:0.3s; box-shadow:0 5px 15px rgba(0,0,0,.08);">
 
-            <div class="add-icone">+</div>
+    <div style="width:70px; height:70px; border-radius:50%; background:#ff9800; color:#fff; display:flex; justify-content:center; align-items:center; font-size:42px; font-weight:bold;">
+        +
+    </div>
 
-            <span>Adicionar Produto</span>
+    <span>Adicionar Produto</span>
 
-        </a>
+</a>
 
     `;
     }
