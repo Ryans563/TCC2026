@@ -4,13 +4,12 @@ require_once "config.php";
 
 $base = "/TCC_RELPJAM";
 
-// BUSCAR CATEGORIAS
 $sqlCategorias = $pdo->query("SELECT * FROM categorias WHERE ativo = TRUE ORDER BY nome ASC");
 $categorias = $sqlCategorias->fetchAll(PDO::FETCH_ASSOC);
 
 $mensagem = "";
 
-// CADASTRAR PRODUTO
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $nome = trim($_POST['nome']);
@@ -21,23 +20,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $marca = trim($_POST['marca']);
     $sku = trim($_POST['sku']);
 
-    // GERAR SLUG
+
     $slug = strtolower($nome);
     $slug = preg_replace('/[^a-zA-Z0-9]/', '-', $slug);
     $slug = preg_replace('/-+/', '-', $slug);
 
-    // IMAGEM
-    $imagemUrl = null;
+    $imagensUrls = [];
 
-        if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] == 0) {
+    if (isset($_FILES['imagens']) && !empty($_FILES['imagens']['name'][0])) {
 
-            $fileTmp = $_FILES['imagem']['tmp_name'];
-            $fileName = uniqid() . '-' . basename($_FILES['imagem']['name']);
-            $fileData = file_get_contents($fileTmp);
+        $supabaseUrl = "https://enkfnnaebiiqyycmegyp.supabase.co";
+        $bucket = "produtos";
+        $key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVua2ZubmFlYmlpcXl5Y21lZ3lwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTA2OTQ3NiwiZXhwIjoyMDk2NjQ1NDc2fQ.dsa2_kej67S5GG_lAXCw3nrSrg7Mvz5xNx_0KNTlMF0";
 
-            $supabaseUrl = "https://enkfnnaebiiqyycmegyp.supabase.co";
-            $bucket = "produtos";
-            $key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVua2ZubmFlYmlpcXl5Y21lZ3lwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTA2OTQ3NiwiZXhwIjoyMDk2NjQ1NDc2fQ.dsa2_kej67S5GG_lAXCw3nrSrg7Mvz5xNx_0KNTlMF0";
+        foreach ($_FILES['imagens']['tmp_name'] as $indice => $tmpName) {
+
+
+            if ($_FILES['imagens']['error'][$indice] !== UPLOAD_ERR_OK) {
+                continue;
+            }
+
+            $fileData = file_get_contents($tmpName);
+            $fileName = uniqid() . '-' . basename($_FILES['imagens']['name'][$indice]);
 
             $uploadUrl = $supabaseUrl . "/storage/v1/object/" . $bucket . "/" . $fileName;
 
@@ -60,15 +64,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             curl_close($ch);
 
             if ($httpCode == 200 || $httpCode == 201) {
-                $imagemUrl = $supabaseUrl . "/storage/v1/object/public/" . $bucket . "/" . $fileName;
+                $imagensUrls[] = $supabaseUrl . "/storage/v1/object/public/" . $bucket . "/" . $fileName;
             } else {
-                die("Erro upload Supabase: " . $response);
+                
+                error_log("Erro upload Supabase (produto: $nome): " . $response);
             }
         }
+    }
 
     try {
 
-        // INSERIR PRODUTO
+
         $sql = $pdo->prepare("
             INSERT INTO produtos (
                 vendedor_id,
@@ -106,12 +112,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':preco' => $preco,
             ':estoque' => $estoque,
             ':marca' => $marca
-            
         ]);
 
         $produto_id = $pdo->lastInsertId();
-        // INSERIR IMAGEM
-        if ($imagemUrl) {
+
+        // INSERIR IMAGENS (a primeira enviada vira a principal)
+        if (!empty($imagensUrls)) {
 
             $sqlImagem = $pdo->prepare("
                 INSERT INTO produto_imagens (
@@ -122,14 +128,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 VALUES (
                     :produto_id,
                     :imagem,
-                    true
+                    :principal
                 )
             ");
 
-            $sqlImagem->execute([
-                ':produto_id' => $produto_id,
-                ':imagem' => $imagemUrl
-            ]);
+            foreach ($imagensUrls as $indice => $url) {
+                $sqlImagem->execute([
+                    ':produto_id' => $produto_id,
+                    ':imagem' => $url,
+                    ':principal' => $indice === 0 ? 1 : 0
+                ]);
+            }
         }
 
         $mensagem = "Produto cadastrado com sucesso!";
@@ -234,18 +243,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="form-group form-group-full">
 
-                <label>Imagem</label>
+                <label>Fotos do Produto</label>
+                <p class="ajuda-campo">A primeira foto selecionada será a foto principal.</p>
 
                 <input
                     type="file"
-                    name="imagem"
+                    name="imagens[]"
                     accept="image/*"
                     id="imagemInput"
+                    multiple
                 >
 
-                <div class="preview" id="preview">
-                    <img id="previewImg">
-                </div>
+                <div class="preview-grid" id="preview"></div>
 
             </div>
 
@@ -259,7 +268,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="modalCategoria">
 
     <div class="modal-content">
@@ -285,30 +293,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <script>
 
-// PREVIEW IMAGEM
 const imagemInput = document.getElementById('imagemInput');
 const preview = document.getElementById('preview');
-const previewImg = document.getElementById('previewImg');
 
 imagemInput.addEventListener('change', (e) => {
 
-    const arquivo = e.target.files[0];
+    preview.innerHTML = '';
 
-    if (!arquivo) return;
+    const arquivos = Array.from(e.target.files);
 
-    const reader = new FileReader();
+    arquivos.forEach((arquivo, indice) => {
 
-    reader.onload = function(evento) {
+        const reader = new FileReader();
 
-        preview.style.display = 'block';
+        reader.onload = function(evento) {
 
-        previewImg.src = evento.target.result;
-    }
+            const wrapper = document.createElement('div');
+            wrapper.className = 'preview-thumb-wrapper';
 
-    reader.readAsDataURL(arquivo);
+            const img = document.createElement('img');
+            img.className = 'preview-thumb';
+            img.src = evento.target.result;
+
+            wrapper.appendChild(img);
+
+            if (indice === 0) {
+                const selo = document.createElement('span');
+                selo.className = 'preview-principal-selo';
+                selo.textContent = 'Principal';
+                wrapper.appendChild(selo);
+            }
+
+            preview.appendChild(wrapper);
+        }
+
+        reader.readAsDataURL(arquivo);
+    });
 });
 
-// MODAL
 const modal = document.getElementById('modalCategoria');
 
 function abrirModal() {
