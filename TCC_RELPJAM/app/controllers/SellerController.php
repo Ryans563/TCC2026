@@ -11,7 +11,7 @@ $vendedorId = $_SESSION['user_id'];
 // Buscar loja do vendedor
 $sqlLoja = $pdo->prepare("
     SELECT id
-    FROM lojas
+    FROM vendedores
     WHERE vendedor_id = ?
 ");
 

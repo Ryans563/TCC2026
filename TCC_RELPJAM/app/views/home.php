@@ -106,7 +106,11 @@ $placeholder = 'https://placehold.co/400x400/f1f5f9/64748b?text=Sem+imagem';
             <button class="icon-btn"> ❤ </button>
             <button class="icon-btn">🔔</button>
             <button class="icon-btn">🛒</button>
-            <a href="/TCC_RELPJAM/app/views/sign.php" class="profile-btn"> Perfil</a>
+            <?php if (($_SESSION['tipo_usuario'] ?? '') === 'vendedor'): ?>
+            <a href="<?= $base ?>/app/views/vendedor.php" class="profile-btn">Minha Loja</a>
+            <?php else: ?>
+            <a href="<?= $base ?>/app/views/sign.php" class="profile-btn">Perfil</a>
+            <?php endif; ?>
 
         </div>
 

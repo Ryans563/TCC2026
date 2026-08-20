@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <title>Adicionar Carrossel</title>
 
-<link rel="stylesheet" href="<?= $base ?>/public/assets/css/style.css">
+<link rel="stylesheet" href="/public/assets/css/style.css">
 </head>
 
 <body>

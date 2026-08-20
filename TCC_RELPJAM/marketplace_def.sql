@@ -48,6 +48,7 @@ CREATE TABLE `categorias` (
   `nome` varchar(150) NOT NULL,
   `slug` varchar(180) NOT NULL,
   `imagem` varchar(255) DEFAULT NULL,
+  `vendedor_id` bigint(20) UNSIGNED DEFAULT NULL,
   `ativo` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -252,6 +253,7 @@ CREATE TABLE `usuarios` (
   `email_verificado` tinyint(1) DEFAULT 0,
   `telefone_verificado` tinyint(1) DEFAULT 0,
   `two_factor_enabled` tinyint(1) DEFAULT 0,
+  `login_tipo` varchar(30) DEFAULT 'email',
   `ultimo_login` timestamp NULL DEFAULT NULL,
   `status` enum('ativo','suspenso','banido') DEFAULT 'ativo',
   `token_reset_senha` varchar(255) DEFAULT NULL,
@@ -301,7 +303,8 @@ ALTER TABLE `carrinho_usuario`
 ALTER TABLE `categorias`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `slug` (`slug`),
-  ADD KEY `fk_categoria_pai` (`categoria_pai_id`);
+  ADD KEY `fk_categoria_pai` (`categoria_pai_id`),
+  ADD KEY `fk_categoria_vendedor` (`vendedor_id`);
 
 --
 -- Índices de tabela `cupons`
@@ -488,7 +491,8 @@ ALTER TABLE `carrinho_usuario`
 -- Restrições para tabelas `categorias`
 --
 ALTER TABLE `categorias`
-  ADD CONSTRAINT `fk_categoria_pai` FOREIGN KEY (`categoria_pai_id`) REFERENCES `categorias` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_categoria_pai` FOREIGN KEY (`categoria_pai_id`) REFERENCES `categorias` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_categoria_vendedor` FOREIGN KEY (`vendedor_id`) REFERENCES `vendedores` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Restrições para tabelas `enderecos_usuario`

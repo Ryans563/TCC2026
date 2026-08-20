@@ -146,7 +146,7 @@
   <div class="logo">
     <a href="/TCC_RELPJAM/app/views/home.php" class="logo">
               <img
-        src="<?= $base ?>/TCC_RELPJAM/public/images/logotop.png"
+        src="/TCC_RELPJAM/public/images/logotop.png"
         alt="Logo "
         style="height:120px;width:auto;display:block;object-fit:contain;"
     >
@@ -195,8 +195,8 @@
    CONFIGURAÇÃO SUPABASE
    Substitua pelos dados do seu projeto (Project Settings > API)
    ============================================================ */
-const SUPABASE_URL = "https://SEU-PROJETO.supabase.co";
-const SUPABASE_ANON_KEY = "SUA_ANON_KEY_AQUI";
+const SUPABASE_URL = "https://enkfnnaebiiqyycmegyp.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_OQBSy-7qdGiEbMtrW9_Mhw_CEgtnosV";
 
 const isSupabaseConfigured = !SUPABASE_URL.includes("SEU-PROJETO");
 

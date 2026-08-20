@@ -1,7 +1,6 @@
-
-
 <?php
 
+session_start();
 
 require_once __DIR__ . '/config.php';
 
@@ -10,279 +9,300 @@ $erro = "";
 $sucesso = "";
 
 
+/*
+|--------------------------------------------------------------------------
+| PROCESSAMENTO
+|--------------------------------------------------------------------------
+*/
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | LOGIN NORMAL
+    |--------------------------------------------------------------------------
+    */
 
 
-if (isset($_POST['login'])) {
+    if (isset($_POST['login'])) {
 
 
-    $email = trim($_POST['loginEmail'] ?? '');
-    $senha = $_POST['loginPassword'] ?? '';
+        $email = trim($_POST['loginEmail'] ?? '');
+        $senha = trim($_POST['loginPassword'] ?? '');
 
 
-    try {
 
+        try {
 
-        $sql = "
-            SELECT *
-            FROM usuarios
-            WHERE email = :email
-            LIMIT 1
-        ";
 
+            $sql = "
 
-        $stmt = $pdo->prepare($sql);
+                SELECT *
 
+                FROM usuarios
 
-        $stmt->bindParam(':email', $email);
+                WHERE email = :email
 
+                LIMIT 1
 
-        $stmt->execute();
+            ";
 
 
-        $usuario = $stmt->fetch();
 
+            $stmt = $pdo->prepare($sql);
 
 
+            $stmt->execute([
 
+                "email" => $email
 
+            ]);
 
-        if ($usuario) {
 
 
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
-            if (password_verify($senha, $usuario['senha_hash'])) {
 
+            if ($usuario) {
 
 
 
+                if (password_verify($senha, $usuario['senha_hash'])) {
 
 
-                session_regenerate_id(true);
 
+                    $_SESSION['usuario_id'] = $usuario['id'];
 
-                $_SESSION['usuario_id'] = $usuario['id'];
-                $_SESSION['usuario_nome'] = $usuario['nome'];
-                $_SESSION['usuario_email'] = $usuario['email'];
-                $_SESSION['tipo_usuario'] = $usuario['tipo_usuario'];
+                    $_SESSION['usuario_nome'] = $usuario['nome'];
 
+                    $_SESSION['usuario_email'] = $usuario['email'];
+                    $_SESSION['tipo_usuario'] = $usuario['tipo_usuario'];
 
 
 
+                    $update = $pdo->prepare("
 
+                        UPDATE usuarios
 
-                $update = $pdo->prepare("
-                    UPDATE usuarios
-                    SET ultimo_login = NOW()
-                    WHERE id = :id
-                ");
+                        SET ultimo_login = NOW()
 
+                        WHERE id = :id
 
-                $update->bindParam(':id', $usuario['id']);
+                    ");
 
 
-                $update->execute();
 
+                    $update->execute([
 
+                        "id" => $usuario['id']
 
+                    ]);
 
-                switch ($usuario['tipo_usuario']) {
 
 
+                    header("Location: " . ($usuario['tipo_usuario'] === 'vendedor' ? 'vendedor.php' : 'home.php'));
 
+                    exit;
 
-                    case 'admin':
 
 
-                        header("Location: admin.php");
-                        exit;
+                } else {
 
 
-
-
-                    case 'vendedor':
-
-
-                        header("Location: vendedor.php");
-                        exit;
-
-
-
-
-                    default:
-
-
-                        header("Location: home.php");
-                        exit;
+                    $erro = "Senha inválida!";
 
 
                 }
 
 
 
-
             } else {
 
 
-                $erro = "Senha inválida!";
+                $erro = "Usuário não encontrado!";
 
 
             }
 
 
 
+        } catch(PDOException $e) {
 
-        } else {
 
-
-            $erro = "Usuário não encontrado!";
+            $erro = "Erro ao realizar login!";
 
 
         }
 
 
-
-
-    } catch (PDOException $e) {
-
-
-        $erro = "Erro ao realizar login!";
-
-
     }
-}
 
 
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CADASTRO NORMAL
+    |--------------------------------------------------------------------------
+    */
 
 
     if (isset($_POST['signup'])) {
 
 
-        $nome  = trim($_POST['signupName'] ?? '');
+
+        $nome = trim($_POST['signupName'] ?? '');
+
         $email = trim($_POST['signupEmail'] ?? '');
+
         $senha = trim($_POST['signupPassword'] ?? '');
+
 
 
         try {
 
 
+
             $check = $pdo->prepare("
+
                 SELECT id
+
                 FROM usuarios
+
                 WHERE email = :email
+
                 LIMIT 1
+
             ");
 
 
-            $check->bindParam(':email', $email);
+
+            $check->execute([
+
+                "email"=>$email
+
+            ]);
 
 
-            $check->execute();
 
 
             if ($check->fetch()) {
 
 
+
                 $erro = "Este e-mail já está cadastrado!";
+
 
 
             } else {
 
 
 
+                $senhaHash = password_hash(
 
-                $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+                    $senha,
 
+                    PASSWORD_DEFAULT
+
+                );
 
 
 
                 $insert = $pdo->prepare("
+
+
                     INSERT INTO usuarios
+
                     (
+
                         nome,
+
                         email,
+
                         senha_hash,
+
                         tipo_usuario,
+
                         status,
+
+                        login_tipo,
+
                         created_at,
+
                         updated_at
+
                     )
+
+
                     VALUES
+
+
                     (
+
                         :nome,
+
                         :email,
+
                         :senha_hash,
+
                         'cliente',
+
                         'ativo',
+
+                        'email',
+
                         NOW(),
+
                         NOW()
+
                     )
+
+
                 ");
 
 
-                $insert->bindParam(':nome', $nome);
-                $insert->bindParam(':email', $email);
-                $insert->bindParam(':senha_hash', $senhaHash);
+
+                $insert->execute([
 
 
-                $insert->execute();
+                    "nome"=>$nome,
+
+                    "email"=>$email,
+
+                    "senha_hash"=>$senhaHash
+
+
+                ]);
+
 
 
                 $sucesso = "Cadastro realizado com sucesso!";
-
-
             }
+        } catch(PDOException $e) { $erro = "Erro ao cadastrar usuário!"; }
 
 
-        } catch (PDOException $e) {
-
-
-            $erro = "Erro ao cadastrar usuário!";
-        }
     }
+
+
 }
 ?>
-
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
 <title>Login RELPJAM</title>
-
-
 <link rel="stylesheet"
 href="/TCC_RELPJAM/public/assets/css/stylecad.css">
-
-
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-
 <script src="/TCC_RELPJAM/public/assets/js/scriptlogin.js" defer></script>
-
-
 </head>
-
-
 <body>
-
-
 <div class="container" id="container">
 
 
@@ -325,7 +345,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 <a href="/TCC_RELPJAM/app/views/home.php" class="logo">
               <img
         src="/TCC_RELPJAM/public/images/logotop.png"
-        alt="logo "
+        alt="Logo "
         style="height:120px;width:auto;display:block;object-fit:contain;"
     >
          </a>
